@@ -4,13 +4,9 @@ import { Seq } from './Seq';
 
 // tslint:disable:no-bitwise
 export class MatchMap {
-  public query = null as null | Seq;
-  public searchSpace = null as null | Seq;
-  // tslint:disable-next-line:variable-name
-  public __results? = new Array<MatchResult>();
+  public myResults? = new Array<number>();
   public orderedResults = new Array<any>();
-  // tslint:disable-next-line:variable-name
-  public __matchFrequencyData = null as null | any[];
+  public myMatchFrequencyData = null as null | any[];
   public initialized = false;
   public offset = 0;
   public positionAdjustment = 0;
@@ -19,33 +15,28 @@ export class MatchMap {
     searchTime: null as null | number,
     sortTime: null as null | number,
   };
-  constructor(query: any, searchSpace: any, offset?: any) {
-    if (!(query instanceof Seq) || !(searchSpace instanceof Seq)) {
-      throw new Error('MatchMap requires valid Seq');
-    }
-  }
+  constructor(readonly query: Seq, readonly searchSpace: Seq, offset?: any) {}
 
-  public initialize(results?: MatchResult[]) {
+  public initialize(results?: number[]) {
     this.orderedResults = [];
-    this.__matchFrequencyData = null;
-
+    this.myMatchFrequencyData = null;
     this.initialized = true;
 
     let t = new Date().valueOf();
 
     if (!results) {
-      const dataArray = new Uint32Array(this.execute(this.query!.buffer, this.searchSpace!.buffer));
+      const dataArray = new Uint32Array(this.execute(this.query.buffer, this.searchSpace.buffer));
 
       this.debug.searchTime = -t + (t = new Date().valueOf());
 
-      const queryLen = this.query!.size;
-      const searchLen = this.searchSpace!.size;
+      const queryLen = this.query.size;
+      const searchLen = this.searchSpace.size;
       const resultsLen = ((8 - (queryLen % 8)) % 8) + 1;
       const totalLen = searchLen + queryLen - 1;
       results = [].slice.call(dataArray, resultsLen, resultsLen + totalLen);
     }
 
-    this.__results = results;
+    this.myResults = results;
     this.debug.prepareTime = -t + (t = new Date().valueOf());
 
     return this;
@@ -63,9 +54,9 @@ export class MatchMap {
     }
 
     const adjust = this.positionAdjustment;
-    this.orderedResults = this.__results!.map((matchResult, index) => ({ n: index + adjust, s: matchResult })).sort(
-      (a, b) => b.n - a.n,
-    );
+    this.orderedResults = this.myResults!
+    .map(function(v, i) { return {n: i + adjust, s: v}; })
+    .sort(function(a, b) { return b.s - a.s; });
     this.debug.sortTime = new Date().valueOf() - t;
     return this;
   }
@@ -93,14 +84,14 @@ export class MatchMap {
     }
 
     if (offset === undefined) {
-      return this.__results!.slice();
+      return this.myResults!.slice();
     }
 
     if (count === undefined) {
-      return this.__results!.slice(offset | 0);
+      return this.myResults!.slice(offset | 0);
     }
 
-    return this.__results!.slice(offset | 0, count | 0);
+    return this.myResults!.slice(offset | 0, count | 0);
   }
 
   public best() {
@@ -159,14 +150,14 @@ export class MatchMap {
       throw new Error('MatchMap must be sorted first.');
     }
 
-    if (this.__matchFrequencyData) {
-      return this.__matchFrequencyData;
+    if (this.myMatchFrequencyData) {
+      return this.myMatchFrequencyData;
     }
 
     const ordered = this.orderedResults;
-    const matchFrequencyData = makeArray(this.query!.size + 1);
+    const matchFrequencyData = makeArray(this.query.size + 1);
 
-    let maxMatch = this.query!.size;
+    let maxMatch = this.query.size;
     let lastIndex = 0;
     let num;
 
@@ -182,8 +173,8 @@ export class MatchMap {
         break;
       }
     }
-
-    return (this.__matchFrequencyData = matchFrequencyData);
+    this.myMatchFrequencyData = matchFrequencyData
+    return this.myMatchFrequencyData;
   }
 
   public countMatches(int: number, aBitCount: number[]) {

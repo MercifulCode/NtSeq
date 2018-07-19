@@ -1,4 +1,5 @@
-var Nt = require('../lib/nt.js');
+import { MatchMap } from './../src/MatchMap';
+import { Seq } from './../src/Seq';
 
 function getTime() {
   var hrTime = process.hrtime()
@@ -54,10 +55,10 @@ var results = [];
 
 for(var i = 0, len = inputs.length; i < len; i++) {
 
-  var qString = Array(inputs[i].data[0]).join(inputs[i].data[2]);
-  var sString = Array(inputs[i].data[1]).join(inputs[i].data[3]);
-  var a = new Nt.Seq().read(qString);
-  var b = new Nt.Seq().read(sString);
+  var qString = Array(inputs[i].data[0]).join(inputs[i].data[2].toString());
+  var sString = Array(inputs[i].data[1]).join(inputs[i].data[3].toString());
+  var a = new Seq().read(qString);
+  var b = new Seq().read(sString);
 
   console.log('Benchmark ' + (i + 1) + ' of ' + len + '...')
 
@@ -66,19 +67,19 @@ for(var i = 0, len = inputs.length; i < len; i++) {
   naiveTime = (new Date).valueOf() - naiveTime;
   console.log('\t ... Naive search complete!')
 
-  var map = new Nt.MatchMap(a, b);
+  var map = new MatchMap(a, b);
   console.log('\t ... Nt.MatchMap complete!')
 
   results.push({
     name: inputs[i].name,
-    search: map.__debug.searchTime,
-    searchScore: ((map.__debug.searchTime * 1000000) / (a.size() * b.size())).toFixed(2),
+    search: map.debug.searchTime,
+    searchScore: ((map.debug.searchTime * 1000000) / Number.parseInt((a.size * b.size).toFixed(2))),
     naive: naiveTime,
-    naiveScore: ((naiveTime * 1000000) / (a.size() * b.size())).toFixed(2),
-    prepare: map.__debug.prepareTime,
-    prepareScore: ((map.__debug.prepareTime * 1000000) / (a.size() * b.size())).toFixed(2),
-    sort: map.__debug.sortTime,
-    sortScore: ((map.__debug.sortTime * 1000000) / (a.size() * b.size())).toFixed(2),
+    naiveScore: ((naiveTime * 1000000) / Number.parseInt((a.size * b.size).toFixed(2))),
+    prepare: map.debug.prepareTime,
+    prepareScore: ((map.debug.prepareTime * 1000000) / Number.parseInt((a.size * b.size).toFixed(2))),
+    sort: map.debug.sortTime,
+    sortScore: ((map.debug.sortTime * 1000000) / Number.parseInt((a.size * b.size).toFixed(2))),
   });
 
 }

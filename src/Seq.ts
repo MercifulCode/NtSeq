@@ -1,6 +1,7 @@
 // tslint:disable:no-bitwise
 import { MatchMap } from './MatchMap';
 import * as nt from './nt';
+import * as fs from 'fs';
 
 export class Seq {
   public buffer = new ArrayBuffer(4);
@@ -232,7 +233,6 @@ export class Seq {
       if (start === 0) {
         return this.clone();
       }
-
       length = this.length - start;
     } else {
       length |= 0;
@@ -464,7 +464,7 @@ export class Seq {
   }
 
   public get content() {
-    if (!this.content) {
+    if (!this.myContent) {
       const ntContentByte = nt.makeArray(256);
 
       const buffer = this.buffer;
@@ -502,9 +502,9 @@ export class Seq {
     }
 
     const returnContent = Object.create(null);
-    const keys = Object.keys(this.content);
+    const keys = Object.keys(this.myContent);
     for (let i = 0, len = keys.length; i < len; i++) {
-      returnContent[keys[i]] = this.content[keys[i]];
+      returnContent[keys[i]] = this.myContent[keys[i]];
     }
 
     return returnContent;
@@ -512,7 +512,7 @@ export class Seq {
 
   public get fractionalContent() {
     if (!this.myFractionalContent) {
-      const content = this.content();
+      const content = this.content;
       const nts = Object.keys(content);
       for (let i = 0, len = nts.length; i < len; i++) {
         content[nts[i]] = content[nts[i]] / this.length;
@@ -534,7 +534,7 @@ export class Seq {
     if (!this.myContentATGC) {
       const ntToBin = nt.nucleotideToBin;
 
-      const content = this.content();
+      const content = this.content;
       const nts = Object.keys(content);
       const contentATGC = Object.create(null);
       contentATGC.A = 0;
@@ -582,8 +582,8 @@ export class Seq {
   }
 
   public get fractionalContentATGC() {
-    if (!this.fractionalContentATGC) {
-      const content = this.myContentATGC();
+    if (!this.myFractionalContentATGC) {
+      const content = this.contentATGC;
       const nts = Object.keys(content);
       for (let i = 0, len = nts.length; i < len; i++) {
         content[nts[i]] = content[nts[i]] / this.length;
@@ -593,7 +593,7 @@ export class Seq {
     }
 
     const returnContent = Object.create(null);
-    const keys = Object.keys(this.fractionalContentATGC);
+    const keys = Object.keys(this.myFractionalContentATGC);
     for (let i = 0, len = keys.length; i < len; i++) {
       returnContent[keys[i]] = this.myFractionalContentATGC[keys[i]];
     }
@@ -680,4 +680,8 @@ export class Seq {
 
     return new MatchMap(seq, this, offset);
   }
+
+  public loadFASTA(path: string) {
+    return this.readFASTA(fs.readFileSync(path).toString());
+  };
 }
