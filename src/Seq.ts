@@ -1,7 +1,7 @@
 // tslint:disable:no-bitwise
+import * as fs from 'fs';
 import { MatchMap } from './MatchMap';
 import * as nt from './nt';
-import * as fs from 'fs';
 
 export class Seq {
   public buffer = new ArrayBuffer(4);
@@ -687,11 +687,11 @@ export class Seq {
     } else {
       return this.load4bnt(path);
     }
-  };
+  }
 
   public loadFASTA(path: string) {
     return this.readFASTA(fs.readFileSync(path).toString());
-  };
+  }
 
   public load4bnt(path: string) {
     const nodeBuffer = fs.readFileSync(path);
@@ -700,7 +700,7 @@ export class Seq {
     const view = new Uint8Array(buffer);
 
     for (let i = 0; i < nodeBuffer.length; ++i) {
-        view[i] = nodeBuffer[i];
+      view[i] = nodeBuffer[i];
     }
 
     return this.readBuffer(buffer);

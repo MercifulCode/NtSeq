@@ -36,7 +36,7 @@
       "lib"
     ],
     "linters": {
-      "*.{md,ts,tsx}": [
+      "*.{md,ts}": [
         "prettier --write",
         "git add"
       ],
@@ -44,7 +44,7 @@
         "markdownlint -c ./markdownlint.json",
         "git add"
       ],
-      "*.{ts,tsx}": [
+      "*.{ts}": [
         "tslint",
         "git add"
       ]
@@ -64,6 +64,8 @@
     "ts-jest": "^23.0.1",
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.13.0",
+    "tslint-jsdoc-rules": "^0.1.2",
     "typescript": "^2.9.2"
   },
   "jest": {

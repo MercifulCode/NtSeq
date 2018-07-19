@@ -1,5 +1,5 @@
 import { MatchResult } from './MatchResult';
-import {  makeArray, makeBitCount, } from './nt';
+import { makeArray, makeBitCount } from './nt';
 import { Seq } from './Seq';
 
 // tslint:disable:no-bitwise
@@ -54,9 +54,7 @@ export class MatchMap {
     }
 
     const adjust = this.positionAdjustment;
-    this.orderedResults = this.myResults!
-    .map(function(v, i) { return {n: i + adjust, s: v}; })
-    .sort(function(a, b) { return b.s - a.s; });
+    this.orderedResults = this.myResults!.map((v, i) => ({ n: i + adjust, s: v })).sort((a, b) => b.s - a.s);
     this.debug.sortTime = new Date().valueOf() - t;
     return this;
   }
@@ -174,7 +172,7 @@ export class MatchMap {
       }
     }
 
-    this.myMatchFrequencyData = matchFrequencyData
+    this.myMatchFrequencyData = matchFrequencyData;
     return this.myMatchFrequencyData;
   }
 
@@ -207,7 +205,8 @@ export class MatchMap {
     let adjustNeg;
     let adjustPos;
     let fnCountMatches;
-    let bitCount = makeBitCount();
+    const bitCount = makeBitCount();
+
     queryInts = new Uint32Array(queryBuffer, 4);
     spaceInts = new Uint32Array(searchSpaceBuffer, 4);
 
@@ -225,6 +224,7 @@ export class MatchMap {
       cur = (queryIntsLength - k) << 3;
 
       for (i = 0 | 0; i < spaceIntsLength; i++) {
+        // tslint:disable-next-line:no-unused-expression
         (T = A & spaceInts[i]) && (mapArray[(i << 3) + cur] += fnCountMatches(T, bitCount));
       }
 
@@ -238,7 +238,9 @@ export class MatchMap {
         for (i = 0 | 0; i < spaceIntsLength; i++) {
           B = spaceInts[i];
           pos = i << 3;
+          // tslint:disable-next-line:no-unused-expression
           (T = A1 & B) && (mapArray[pos + adjustNeg] += fnCountMatches(T, bitCount));
+          // tslint:disable-next-line:no-unused-expression
           (T = A2 & B) && (mapArray[pos + adjustPos] += fnCountMatches(T, bitCount));
         }
 
