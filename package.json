@@ -1,12 +1,13 @@
 {
-  "name": "ntseq",
-  "version": "1.1.0",
+  "name": "NtSeqTS",
+  "version": "1.0.0",
   "description": "Nucleotide sequence manipulation and analysis library",
   "author": "Keith Horwood",
   "license": "MIT",
   "main": "lib/nt.js",
   "scripts": {
     "lint": "tslint --project ./",
+    "precommit": "lint-staged && yarn test",
     "test": "jest"
   },
   "files": [
