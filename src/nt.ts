@@ -25,7 +25,7 @@ export const makeArray = (length: number, val?: number | string) => {
   return a;
 };
 
-export const bitCount = (() => {
+export const makeBitCount = () => {
   const a = new Uint8Array(256);
   let bin;
   for (let i = 0; i < 256; i++) {
@@ -35,7 +35,7 @@ export const bitCount = (() => {
     a[i] = (((bin + (bin >> 4)) & 0x0f0f0f0f) * 0x01010101) >> 24;
   }
   return a;
-})();
+};
 
 export const nucleotideTo4Bit: { [key: string]: number } = {
   A: 8, // 0b1000

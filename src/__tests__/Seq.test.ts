@@ -207,9 +207,9 @@ describe('Seq', () => {
     expect(seq.translateFrame(1, 1, 2)).toEqual(expected);
   });
 
-  it.only.each(['fasta', '4bnt'])(
+  it.each(['fasta', '4bnt'])(
     'Should have mapSequence successfully find match scores loaded from .%s file.', (ext) => {
-    const seqA = new Seq().loadFASTA(Path.resolve(__dirname, `data/sequence.${ext}`))
+    const seqA = new Seq().loadFile(Path.resolve(__dirname, `data/sequence.${ext}`), ext)
     const seqB = new Seq().read('TCTTATTTGTGCTGTTTATT');
     const matchMap = seqA.mapSequence(seqB).initialize().sort();
     const testData = [

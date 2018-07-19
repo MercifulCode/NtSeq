@@ -681,7 +681,28 @@ export class Seq {
     return new MatchMap(seq, this, offset);
   }
 
+  public loadFile(path: string, ext: 'fasta' | '4bnt') {
+    if (ext === 'fasta') {
+      return this.loadFASTA(path);
+    } else {
+      return this.load4bnt(path);
+    }
+  };
+
   public loadFASTA(path: string) {
     return this.readFASTA(fs.readFileSync(path).toString());
   };
+
+  public load4bnt(path: string) {
+    const nodeBuffer = fs.readFileSync(path);
+
+    const buffer = new ArrayBuffer(nodeBuffer.length);
+    const view = new Uint8Array(buffer);
+
+    for (let i = 0; i < nodeBuffer.length; ++i) {
+        view[i] = nodeBuffer[i];
+    }
+
+    return this.readBuffer(buffer);
+  }
 }

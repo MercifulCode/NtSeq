@@ -1,5 +1,5 @@
 import { MatchResult } from './MatchResult';
-import { bitCount, makeArray } from './nt';
+import {  makeArray, makeBitCount, } from './nt';
 import { Seq } from './Seq';
 
 // tslint:disable:no-bitwise
@@ -173,11 +173,12 @@ export class MatchMap {
         break;
       }
     }
+
     this.myMatchFrequencyData = matchFrequencyData
     return this.myMatchFrequencyData;
   }
 
-  public countMatches(int: number, aBitCount: number[]) {
+  public countMatches(int: number, aBitCount: Uint8Array) {
     int |= int >>> 1;
     int |= int >>> 2;
     int &= 0x11111111;
@@ -206,7 +207,7 @@ export class MatchMap {
     let adjustNeg;
     let adjustPos;
     let fnCountMatches;
-
+    let bitCount = makeBitCount();
     queryInts = new Uint32Array(queryBuffer, 4);
     spaceInts = new Uint32Array(searchSpaceBuffer, 4);
 
@@ -224,8 +225,7 @@ export class MatchMap {
       cur = (queryIntsLength - k) << 3;
 
       for (i = 0 | 0; i < spaceIntsLength; i++) {
-        // tslint:disable-next-line:no-unused-expression
-        (T = A & spaceInts[i]) && (mapArray[(i << 3) + cur] += fnCountMatches(T, Array.from(bitCount)));
+        (T = A & spaceInts[i]) && (mapArray[(i << 3) + cur] += fnCountMatches(T, bitCount));
       }
 
       A1 = A >>> 4;
@@ -238,11 +238,8 @@ export class MatchMap {
         for (i = 0 | 0; i < spaceIntsLength; i++) {
           B = spaceInts[i];
           pos = i << 3;
-
-          // tslint:disable-next-line:no-unused-expression
-          (T = A1 & B) && (mapArray[pos + adjustNeg] += fnCountMatches(T, Array.from(bitCount)));
-          // tslint:disable-next-line:no-unused-expression
-          (T = A2 & B) && (mapArray[pos + adjustPos] += fnCountMatches(T, Array.from(bitCount)));
+          (T = A1 & B) && (mapArray[pos + adjustNeg] += fnCountMatches(T, bitCount));
+          (T = A2 & B) && (mapArray[pos + adjustPos] += fnCountMatches(T, bitCount));
         }
 
         A1 >>>= 4;

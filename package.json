@@ -6,8 +6,8 @@
   "license": "MIT",
   "main": "lib/nt.js",
   "scripts": {
-    "test": "jest",
-    "benchmark": "ts-node ./tests/benchmark.js"
+    "lint": "tslint --project ./",
+    "test": "jest"
   },
   "files": [
     "lib/",
@@ -30,6 +30,25 @@
     "gene",
     "biojs"
   ],
+  "lint-staged": {
+    "ignore": [
+      "lib"
+    ],
+    "linters": {
+      "*.{md,ts,tsx}": [
+        "prettier --write",
+        "git add"
+      ],
+      "*.md": [
+        "markdownlint -c ./markdownlint.json",
+        "git add"
+      ],
+      "*.{ts,tsx}": [
+        "tslint",
+        "git add"
+      ]
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/keithwhor/NtSeq"
@@ -37,8 +56,12 @@
   "devDependencies": {
     "@types/jest": "^23.3.0",
     "jest": "^23.4.1",
+    "lint-staged": "^7.2.0",
+    "markdownlint-cli": "^0.11.0",
+    "prettier": "^1.13.7",
     "ts-jest": "^23.0.1",
     "ts-node": "^7.0.0",
+    "tslint": "^5.11.0",
     "typescript": "^2.9.2"
   },
   "jest": {
