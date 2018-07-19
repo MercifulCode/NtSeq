@@ -1,13 +1,22 @@
 {
-  "name": "NtSeqTS",
-  "version": "1.0.0",
+  "name": "nt-seq-ts",
+  "version": "0.0.2",
   "description": "Nucleotide sequence manipulation and analysis library",
   "author": "Keith Horwood",
+  "contributors": [
+    {
+      "name": "Drew Diamantoukos",
+      "email": "MercifulCode@gmail.com",
+      "url": "https://github.com/MercifulCode"
+    }
+  ],
   "license": "MIT",
-  "main": "lib/nt.js",
+  "main": "lib/index.js",
   "scripts": {
+    "build": "tsc",
     "lint": "tslint --project ./",
     "precommit": "lint-staged && yarn test",
+    "prepublish": "rm -rf lib && yarn build && git add lib && git add -u lib",
     "test": "jest"
   },
   "files": [
@@ -29,7 +38,8 @@
     "analysis",
     "genomics",
     "gene",
-    "biojs"
+    "biojs",
+    "typescript"
   ],
   "lint-staged": {
     "ignore": [
@@ -52,7 +62,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/keithwhor/NtSeq"
+    "url": "https://github.com/MercifulCode/NtSeq"
   },
   "devDependencies": {
     "@types/jest": "^23.3.0",
