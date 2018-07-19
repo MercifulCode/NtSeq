@@ -1,5 +1,6 @@
+import 'isomorphic-fetch';
+
 // tslint:disable:no-bitwise
-import * as fs from 'fs';
 import { MatchMap } from './MatchMap';
 import * as nt from './nt';
 
@@ -681,28 +682,34 @@ export class Seq {
     return new MatchMap(seq, this, offset);
   }
 
-  public loadFile(path: string, ext: 'fasta' | '4bnt') {
+  public async loadFile(path: string, ext: 'fasta' | '4bnt') {
     if (ext === 'fasta') {
-      return this.loadFASTA(path);
+      return await this.loadFASTA(path);
     } else {
-      return this.load4bnt(path);
+      return await this.load4bnt(path);
     }
   }
 
-  public loadFASTA(path: string) {
-    return this.readFASTA(fs.readFileSync(path).toString());
+  public async loadFASTA(path: string) {
+    const response = await fetch(path);
+    if (response.ok && response.body) {
+      return this.readFASTA(await response.text());
+    }
   }
 
-  public load4bnt(path: string) {
-    const nodeBuffer = fs.readFileSync(path);
+  public async load4bnt(path: string) {
+    const response = await fetch(path);
 
-    const buffer = new ArrayBuffer(nodeBuffer.length);
-    const view = new Uint8Array(buffer);
+    if (response.ok && response.body) {
+      const nodeBuffer = (await response.body) as any;
+      const buffer = new ArrayBuffer(nodeBuffer.length);
+      const view = new Uint8Array(buffer);
 
-    for (let i = 0; i < nodeBuffer.length; ++i) {
-      view[i] = nodeBuffer[i];
+      for (let i = 0; i < nodeBuffer.length; ++i) {
+        view[i] = nodeBuffer[i];
+      }
+
+      return this.readBuffer(buffer);
     }
-
-    return this.readBuffer(buffer);
   }
 }

@@ -1,7 +1,13 @@
-import { Seq } from '../Seq';
+import * as fs from 'fs';
+import * as fetchMock from 'jest-fetch-mock';
 import * as Path from 'path';
+import { Seq } from '../Seq';
 
 describe('Seq', () => {
+  beforeEach(() => {
+    fetchMock.resetMocks();
+  });
+
   it('Should report the correct sequence size.', () => {
     const seq = new Seq().read('ATGCATG');
     expect(seq.size).toEqual(7);
@@ -111,52 +117,52 @@ describe('Seq', () => {
   it('Should have the correct content for a sequence.', () => {
     const seq = new Seq().read('ATGCATGCATGC');
     const { content } = seq;
-    expect(content['A']).toEqual(3);
-    expect(content['C']).toEqual(3);
-    expect(content['G']).toEqual(3);
-    expect(content['T']).toEqual(3);
+    expect(content.A).toEqual(3);
+    expect(content.C).toEqual(3);
+    expect(content.G).toEqual(3);
+    expect(content.T).toEqual(3);
   });
 
   it('Should have the correct content for a sequence with degenerate nucleotides.', () => {
     const seq = new Seq().read('AT-GCATGCATGCATGC--NW');
     const { content } = seq;
-    expect(content['A']).toEqual(4);
-    expect(content['C']).toEqual(4);
-    expect(content['G']).toEqual(4);
-    expect(content['T']).toEqual(4);
+    expect(content.A).toEqual(4);
+    expect(content.C).toEqual(4);
+    expect(content.G).toEqual(4);
+    expect(content.T).toEqual(4);
     expect(content['-']).toEqual(3);
-    expect(content['N']).toEqual(1);
-    expect(content['W']).toEqual(1);
+    expect(content.N).toEqual(1);
+    expect(content.W).toEqual(1);
   });
 
   it('Should have the correct fractional content for a sequence.', () => {
     const seq = new Seq().read('ATGCATGCATGCATGC');
-    
+
     const { fractionalContent } = seq;
-    expect(fractionalContent['A']).toEqual(0.25);
-    expect(fractionalContent['C']).toEqual(0.25);
-    expect(fractionalContent['G']).toEqual(0.25);
-    expect(fractionalContent['T']).toEqual(0.25);
+    expect(fractionalContent.A).toEqual(0.25);
+    expect(fractionalContent.C).toEqual(0.25);
+    expect(fractionalContent.G).toEqual(0.25);
+    expect(fractionalContent.T).toEqual(0.25);
   });
 
   it('Should have the correct ATGC (average) content for a sequence.', () => {
     const seq = new Seq().read('WWWWNNNN');
-    
+
     const { contentATGC } = seq;
-    expect(contentATGC['A']).toEqual(3);
-    expect(contentATGC['C']).toEqual(1);
-    expect(contentATGC['G']).toEqual(1);
-    expect(contentATGC['T']).toEqual(3);
+    expect(contentATGC.A).toEqual(3);
+    expect(contentATGC.C).toEqual(1);
+    expect(contentATGC.G).toEqual(1);
+    expect(contentATGC.T).toEqual(3);
   });
 
   it('Should have the correct ATGC (average) fractional content for a sequence.', () => {
     const seq = new Seq().read('WWWWNNNN');
-    
+
     const { fractionalContentATGC } = seq;
-    expect(fractionalContentATGC['A']).toEqual(0.375);
-    expect(fractionalContentATGC['C']).toEqual(0.125);
-    expect(fractionalContentATGC['G']).toEqual(0.125);
-    expect(fractionalContentATGC['T']).toEqual(0.375);
+    expect(fractionalContentATGC.A).toEqual(0.375);
+    expect(fractionalContentATGC.C).toEqual(0.125);
+    expect(fractionalContentATGC.G).toEqual(0.125);
+    expect(fractionalContentATGC.T).toEqual(0.375);
   });
 
   it('Should translate a sequence consisting of a single amino acid.', () => {
@@ -208,39 +214,50 @@ describe('Seq', () => {
   });
 
   it.each(['fasta', '4bnt'])(
-    'Should have mapSequence successfully find match scores loaded from .%s file.', (ext) => {
-    const seqA = new Seq().loadFile(Path.resolve(__dirname, `data/sequence.${ext}`), ext)
-    const seqB = new Seq().read('TCTTATTTGTGCTGTTTATT');
-    const matchMap = seqA.mapSequence(seqB).initialize().sort();
-    const testData = [
-      233,
-      1571,
-      5942,
-      14035,
-      24226,
-      31360,
-      32021,
-      26118,
-      17738,
-      9439,
-      4181,
-      1509,
-      418,
-      112,
-      15,
-      3,
-      0,
-      0,
-      0,
-      0,
-      1
-    ];
+    'Should have mapSequence successfully find match scores loaded from .%s file.',
+    async ext => {
+      const path = Path.resolve(__dirname, `data/sequence.${ext}`);
+      if (ext === 'fasta') {
+        fetchMock.mockResponse(fs.readFileSync(path).toString());
+      } else {
+        fetchMock.mockResponse(fs.readFileSync(path) as any);
+      }
+      const seqA = await new Seq().loadFile(path, ext);
+      const seqB = new Seq().read('TCTTATTTGTGCTGTTTATT');
+      const matchMap = seqA
+        .mapSequence(seqB)
+        .initialize()
+        .sort();
+      const testData = [
+        233,
+        1571,
+        5942,
+        14035,
+        24226,
+        31360,
+        32021,
+        26118,
+        17738,
+        9439,
+        4181,
+        1509,
+        418,
+        112,
+        15,
+        3,
+        0,
+        0,
+        0,
+        0,
+        1,
+      ];
 
-    const matchFrequencyData = matchMap.matchFrequencyData();
-    for (let i = 0; i < matchFrequencyData.length; i++) {
-      expect(matchFrequencyData[i]).toEqual(testData[i]);
-    }
-    expect(matchMap.best().position).toEqual(34786);
-    expect(matchMap.best().score).toEqual(20);
-  });
-})
+      const matchFrequencyData = matchMap.matchFrequencyData();
+      for (let i = 0; i < matchFrequencyData.length; i++) {
+        expect(matchFrequencyData[i]).toEqual(testData[i]);
+      }
+      expect(matchMap.best().position).toEqual(34786);
+      expect(matchMap.best().score).toEqual(20);
+    },
+  );
+});
